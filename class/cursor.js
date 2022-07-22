@@ -20,13 +20,23 @@ class Cursor {
     Screen.setBackgroundColor(this.row, this.col, this.cursorColor);
   }
 
-  left() {
-    if (this.col > 0) this.col--;
-  }
+  left = () => {
+    if (this.col > 0) {
+      this.resetBackgroundColor();
+      this.col--;
+      this.setBackgroundColor();
+      Screen.render();
+    }
+  };
 
-  right() {
-    if (this.col < this.numCols - 1) this.col++;
-  }
+  right = () => {
+    if (this.col < this.numCols - 1) {
+      this.resetBackgroundColor();
+      this.col++;
+      this.setBackgroundColor();
+      Screen.render();
+    }
+  };
 }
 
 module.exports = Cursor;

@@ -3,7 +3,7 @@ const Cursor = require("./cursor");
 
 class ConnectFour {
   constructor() {
-    this.playerTurn = "O";
+    this.playerTurn = "X";
 
     this.grid = [
       [" ", " ", " ", " ", " ", " ", " "],
@@ -20,16 +20,41 @@ class ConnectFour {
     Screen.initialize(6, 7);
     Screen.setGridlines(true);
 
-    // Replace this with real commands
-    Screen.addCommand("t", "test command (remove)", ConnectFour.testCommand);
+    Screen.addCommand("left", "move left", this.cursor.left);
+    Screen.addCommand("right", "move right", this.cursor.right);
+    Screen.addCommand(
+      "space",
+      `place ${this.playerTurn}`,
+      ConnectFour.placeMove.bind(this)
+    );
 
     this.cursor.setBackgroundColor();
     Screen.render();
   }
 
-  // Remove this
-  static testCommand() {
-    console.log("TEST COMMAND");
+  static placeMove() {
+    Screen.setMessage("");
+    let row;
+    for (let i = this.grid.length - 1; i >= 0; i--) {
+      if (this.grid[i][this.cursor.col] === " ") {
+        row = i;
+        break;
+      }
+    }
+    if (!row) {
+      Screen.setMessage("This column is full, please choose another one.");
+    } else {
+      this.grid[row][this.cursor.col] = this.playerTurn;
+      Screen.setGrid(row, this.cursor.col, this.playerTurn);
+    }
+    Screen.render();
+    ConnectFour.updateGame.call(this);
+  }
+
+  static updateGame() {
+    this.playerTurn = this.playerTurn === "X" ? "O" : "X";
+    const winner = ConnectFour.checkWin(this.grid);
+    if (winner) ConnectFour.endGame(winner);
   }
 
   static _horizontalWin(grid) {
@@ -62,13 +87,13 @@ class ConnectFour {
     for (let i = 0; i < grid.length; i++) {
       for (let j = grid[i].length - 1; j >= 0; j--) {
         let lastChar = grid[i][j];
-        let count = 1;
+        let count = 0;
         let [row, col] = [i, j];
         while (row < grid.length && col >= 0) {
           if (grid[row][col] === lastChar && grid[row][col] !== " ") {
             count++;
           } else {
-            count = 1;
+            count = 0;
           }
           row++;
           col--;
@@ -82,13 +107,13 @@ class ConnectFour {
     for (let i = 0; i < grid.length; i++) {
       for (let j = 0; j < grid[i].length; j++) {
         let lastChar = grid[i][j];
-        let count = 1;
+        let count = 0;
         let [row, col] = [i, j];
         while (row < grid.length && col < grid[i].length) {
           if (grid[row][col] === lastChar && grid[row][col] !== " ") {
             count++;
           } else {
-            count = 1;
+            count = 0;
           }
           row++;
           col++;
